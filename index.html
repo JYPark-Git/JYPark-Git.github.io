@@ -18,7 +18,7 @@
     
     body {
       font-family: Arial, sans-serif;
-      height: calc(100vh);
+      height: 100vh;
       background-color: #f0f0f0;
       position: relative;
     }
@@ -56,13 +56,11 @@
 <body>
   <!--div id="root"></!--div-->
   <div class="container">
-    <div id="timer">00 : 00</div>
     <button id="speak">시작</button>
     <button id="stop">종료</button>
   </div>
 
   <script>
-    const timerDiv = document.getElementById('timer');
     const speakButton = document.getElementById('speak');
     const stopButton = document.getElementById('stop');
     const synth = window.speechSynthesis;
@@ -70,11 +68,23 @@
     const utteranceQueue = [];
     let isSpeaking = false;
     let voices = [];
-    let speakingSecs = 0;
 
+    // 화면 유지용
+    let wakeLock = null;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+
+      // Wake Lock이 끊어지는 경우 이벤트 처리
+      wakeLock.addEventListener('release', () => {
+        alert('화면 유지 끊김');
+      });
+    } catch (err) {
+      alert('화면 유지 오류 발생');
+    }
+    
     // 음성 목록이 로드될 때마다 호출되는 이벤트 리스너
     synth.onvoiceschanged = setVoice;
-
+    
     // 음성 목록이 로드된 후 음성을 설정
     function setVoice() {
       voices = synth.getVoices();
@@ -201,7 +211,6 @@
       pushUtteranceQueue('갑자기 몸을 움직이지 마시고 천천히 움직이십시오.');
       pushUtteranceQueue('끝!');
 
-      speakingSecs = 0;
       isSpeaking = true;
       speakTextQueue();
     });
@@ -209,7 +218,6 @@
     stopButton.addEventListener('click', () => {
       synth.cancel();
       utteranceQueue.length = 0;
-      timerDiv.textContent = '00 : 00';
       isSpeaking = false;
     });
 
