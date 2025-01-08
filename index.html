@@ -5,11 +5,214 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JYPark-Blog</title>
-  <link rel="stylesheet" href="./code/layout.css">
   <link rel="icon" src="./favicon.ico">
-  <script defer src="code/main.js" type="module"></script>
+  <!--link rel="stylesheet" href="./code/layout.css">
+  <script-- defer src="code/main.js" type="module"></script-->
+  <style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      height: calc(100vh);
+      background-color: #f0f0f0;
+      position: relative;
+    }
+
+    .container {
+      position: sticky;
+      top: 50%;;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      width: 220px;
+      text-align: center;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #0984e3;
+      color: white;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #74b9ff;
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
+  <!--div id="root"></!--div-->
+  <div class="container">
+    <div id="timer">00 : 00</div>
+    <button id="speak">시작</button>
+    <button id="stop">종료</button>
+  </div>
+
+  <script>
+    const timerDiv = document.getElementById('timer');
+    const speakButton = document.getElementById('speak');
+    const stopButton = document.getElementById('stop');
+    const synth = window.speechSynthesis;
+
+    const utteranceQueue = [];
+    let isSpeaking = false;
+    let voices = [];
+    let speakingSecs = 0;
+
+    // 음성 목록이 로드될 때마다 호출되는 이벤트 리스너
+    synth.onvoiceschanged = setVoice;
+
+    // 음성 목록이 로드된 후 음성을 설정
+    function setVoice() {
+      voices = synth.getVoices();
+    }
+
+    function pushUtteranceQueue(text, time = 0.1) {
+      utteranceQueue.push({
+        text,
+        time,
+      });
+    }
+
+    function speakTextQueue() {
+      if (utteranceQueue.length === 0) {
+        isSpeaking = false;
+        return;
+      }
+      const current = utteranceQueue.shift();
+      const utterance = new SpeechSynthesisUtterance(current.text);
+      const voice = voices.find(voice => voice.name === 'Google 한국의');
+      if (voice) {
+        utterance.voice = voice;
+      }
+      utterance.rate = 1;
+      utterance.volume = 1;
+
+      utterance.onend = () => {
+        if (current.time) {
+          setTimeout(speakTextQueue, current.time * 1000);
+        } else {
+          speakTextQueue();
+        }
+      };
+      synth.speak(utterance);
+    }
+
+    speakButton.addEventListener('click', () => {
+      if (isSpeaking) {
+        return;
+      }
+
+      pushUtteranceQueue('근육 이완 훈련 지시문', 0.5);
+      pushUtteranceQueue('편안한 복장으로, 편안한 자세를 취합시다.');
+      pushUtteranceQueue('자, 눈을 감고 깊이 숨을 쉬어 봅시다.');
+      pushUtteranceQueue('복식호흡을 하면서 부드럽게 숨을 쉬십시오', 10);
+      pushUtteranceQueue('이제부터 이완 연습을 시작하겠습니다.');
+      pushUtteranceQueue('오른쪽 주먹을 꼬옥 쥐어서 근육을 긴장시켜 봅시다', 7);
+      pushUtteranceQueue('자, 오른손의 근육을 편안하게 이완시키시고- 근육을 긴장시켰을 때와 풀어 주었을 때의 느낌을 비교 해보십시오', 10);
+      pushUtteranceQueue('이번에는 왼손입니다.');
+      pushUtteranceQueue('왼쪽 주먹을 꼬옥 쥐어서 긴장시켜 봅시다', 7);
+      pushUtteranceQueue('자, 왼손을 편안하게 이완시키시고 왼손 근육을 긴장시켰을 때와 풀어 주었을 때의 느낌이 어떻게 다른지 비교해 보십시오.', 10);
+      pushUtteranceQueue('이번에는 오른쪽 팔 근육입니다.');
+      pushUtteranceQueue('팔을 들어 굽히고 팔에 힘을 주어 보세요', 7);
+      pushUtteranceQueue('오른 팔 근육을 편안하게 풀어 주세요.');
+      pushUtteranceQueue('팔을 긴장시켰을 때와 풀어 주었을 때의 느낌을 비교해 보십시오', 10);
+      pushUtteranceQueue('같은 방법으로 이번에는 왼쪽 팔 근육을 긴장시켜 봅시다', 7);
+      pushUtteranceQueue('자 힘을 빼시고 편안하게 이완시켜 주세요.');
+      pushUtteranceQueue('왼쪽 팔을 긴장시켰을 때와 이완시켰을 때의 느낌이 어떻게 다른지 비교해 보십시오', 10);
+      pushUtteranceQueue('이제 오른 발과 다리의 근육을 긴장시킬 차례입니다.');
+      pushUtteranceQueue('오른쪽 발을 들고 발끝을 쭉 뻗어 봅시다.');
+      pushUtteranceQueue('발과 다리의 근육에 힘이 들어가고 긴장된 것을 느껴야 합니다', 7);
+      pushUtteranceQueue('자, 이제 편안하게 풀어 주시고 긴장 되었을 때와 이완되었을 때의 차이를 음미해 보십시오', 10);
+      pushUtteranceQueue('같은 방식으로 왼쪽 발과 다리의 근육을 긴장시켜 봅시다', 7);
+      pushUtteranceQueue('자, 이제 편안하게 이완시키시고 긴장했을 때와 이완했을 때의 차이를 깊게 음미해 보십시오', 10);
+      pushUtteranceQueue('이번에는 양 허벅지 근육을 긴장시켜 봅시다.');
+      pushUtteranceQueue('두 다리를 모아 들고 허벅지를 서로 눌러 주세요. 근육의 긴장을 느끼세요.', 7);
+      pushUtteranceQueue('네, 이제 편안하게 풀어 주시고 다리가 긴장되었을 때의 이완되었을 때를 비교해 보십시오.', 10);
+      pushUtteranceQueue('자, 이제 아랫배의 근육을 긴장시켜 봅시다.');
+      pushUtteranceQueue('아랫배를 들여보낸 채 가만히 계십시오', 7);
+      pushUtteranceQueue('자, 편안하게 이완해 주십시오.');
+      pushUtteranceQueue('긴장되었을 때와 이완되었을 때를 비교해 보십시오.', 10);
+      pushUtteranceQueue('이제 가슴의 근육을 긴장시켜 봅시다.');
+      pushUtteranceQueue('깊이 숨을 들이쉰 다음 멈추십시오', 7);
+      pushUtteranceQueue('자, 숨을 내 쉬면서 편안하게 이완시켜 봅시다.');
+      pushUtteranceQueue('가슴의 근육이 긴장되었을 때와 이완 되었을 때의 차이를 음미해 봅시다', 10);
+      pushUtteranceQueue('이완이 점점 깊어 갑니다.');
+      pushUtteranceQueue('자신의 호흡을 관찰해 보십시오.');
+      pushUtteranceQueue('아주 규칙적으로 호흡하고 계십니다.');
+      pushUtteranceQueue('한번 들이 쉴 때마다 이완이 깊어 갑니다.');
+      pushUtteranceQueue('한번 씩 내 쉴 때마다 편안한 이완의 느낌이 온 몸 구석구석 퍼져 갑니다.');
+      pushUtteranceQueue('자 이번에는 어깨를 긴장시켜 봅시다.');
+      pushUtteranceQueue('어깨를 귀까지 올려 주세요.', 7);
+      pushUtteranceQueue('자, 이제 어깨 근육 을 편안하게 풀어 주십시오.');
+      pushUtteranceQueue('어깨 근육을 긴장시켰을 때와 이완시켰을 때의 차이점을 음미해 보십시오.', 10);
+      pushUtteranceQueue('자, 목의 근육을 긴장시켜 봅시다.');
+      pushUtteranceQueue('턱을 조금 당기고 목뒤의 목받침을 목으로 지긋이 누르듯 목에 힘을 줍시다', 7);
+      pushUtteranceQueue('편안하게 힘을 빼시고- 목의 근육이 긴장되었을 때와 이완시켰을 때를 비교해 보십시오', 10);
+      pushUtteranceQueue('이번에는 입술을 긴장시켜 봅시다.');
+      pushUtteranceQueue('입을 꼭 다물어 주십시오', 7);
+      pushUtteranceQueue('자, 이제 편안하게 이완 해 보십시오.');
+      pushUtteranceQueue('긴장했을 때와 이완했을 때의 차이를 음미해 보십시오.', 10);
+      pushUtteranceQueue('자, 눈의 근육을 긴장시켜 봅시다. 눈을 꼭 감고 계십시오', 7); 
+      pushUtteranceQueue('자, 편안하게 눈의 근육을 풀어주시고 눈의 근육을 긴장시켰을 때와 이완시켰을 때를 비교해 보십시오.', 10);
+      pushUtteranceQueue('이번에는 아래 이마를 긴장시켜 봅시다.');
+      pushUtteranceQueue('양 눈썹을 모으고 미간을 찌푸려 주세요', 7);
+      pushUtteranceQueue('자, 이제 편안하게 이마 근육을 풀어 주세요. 아래 이마를 긴장시켰을 때와 이완시켰을 때를 비교해 봅시다.', 10);
+      pushUtteranceQueue('이번에는 윗 이마를 긴장시켜 봅시다. 눈썹을 위쪽으로 해서 이마에 큰 주름을 만들어 보세요', 7);
+      pushUtteranceQueue('자, 이제 편안하게 이마 근육을 풀어 보세요. 윗 이마 근육이 긴장되었을 때와 이완되었을 때의 차이를 느껴 보십시오.', 10);
+      pushUtteranceQueue('더욱 깊은 이완상태로 들어가도록 도와 드리겠습니다.');
+      pushUtteranceQueue('하나부터 다섯까지 세겠습니다.');
+      pushUtteranceQueue('제가 세는 동안. 점점 더 깊게, 그리고 편안하게 이완되고 풀어져서 아주 고요한 휴식 상태로 들어갈 것입니다.');
+      pushUtteranceQueue('하나', 5);
+      pushUtteranceQueue('둘', 5);
+      pushUtteranceQueue('셋', 5);
+      pushUtteranceQueue('넷', 5);
+      pushUtteranceQueue('다섯');
+      pushUtteranceQueue('아주 깊고 고요 한 휴식 상태입니다.');
+      pushUtteranceQueue('편안한 이완상태를 유지하면서 이번에는 호흡에 주의를 기울여 보십시오.');
+      pushUtteranceQueue('조용히 복식호흡을 계속하십시오', 20);
+      pushUtteranceQueue('복식호흡을 계속하시면서 한 번 상상해 보십시오 바닷가 모래밭에 따스한 햇살을 받으며 누워 있습니다.');
+      pushUtteranceQueue('부드럽고 따뜻한 모래가 느껴집니다.');
+      pushUtteranceQueue('파도 소리가 들립니다 파도가 밀려왔다가 부서집니 다 파도가 또 와서 부서집니다.');
+      pushUtteranceQueue('싱그러운 바다 내음이 느껴집니다', 60);
+      pushUtteranceQueue('목욕탕에 혼자 몸을 담그고 있는 자신을 그려봅시다.');
+      pushUtteranceQueue('물은 알맞게 따뜻하고 수증기가 보이고 목까지 따뜻한 물에 담그고 있습니다.', 60);
+      pushUtteranceQueue('자, 이제 깨어날 시간입니다.');
+      pushUtteranceQueue('다섯에서 하나까지 세겠습니다. 지금부터 점점 정신이 들게될 것입니다. 둘에 눈을 떠 주세요. 하나를 셀 때는 평소의 각성 상태로 돌아갑니다');
+      pushUtteranceQueue('다섯', 2);
+      pushUtteranceQueue('넷', 2);
+      pushUtteranceQueue('셋', 2); 
+      pushUtteranceQueue('둘', 2); 
+      pushUtteranceQueue('하나', 2); 
+      pushUtteranceQueue('아주 상쾌한 느낌입니다.');
+      pushUtteranceQueue('갑자기 몸을 움직이지 마시고 천천히 움직이십시오.');
+      pushUtteranceQueue('끝!');
+
+      speakingSecs = 0;
+      isSpeaking = true;
+      speakTextQueue();
+    });
+
+    stopButton.addEventListener('click', () => {
+      synth.cancel();
+      utteranceQueue.length = 0;
+      timerDiv.textContent = '00 : 00';
+      isSpeaking = false;
+    });
+
+  </script>
 </body>
 </html>
