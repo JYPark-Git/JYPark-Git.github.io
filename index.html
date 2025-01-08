@@ -71,16 +71,18 @@
 
     // 화면 유지용
     let wakeLock = null;
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
+    (async () => {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
 
-      // Wake Lock이 끊어지는 경우 이벤트 처리
-      wakeLock.addEventListener('release', () => {
-        alert('화면 유지 끊김');
-      });
-    } catch (err) {
-      alert('화면 유지 오류 발생');
-    }
+        // Wake Lock이 끊어지는 경우 이벤트 처리
+        wakeLock.addEventListener('release', () => {
+          alert('화면 유지 끊김');
+        });
+      } catch (err) {
+        alert('화면 유지 오류 발생');
+      }
+    })();
     
     // 음성 목록이 로드될 때마다 호출되는 이벤트 리스너
     synth.onvoiceschanged = setVoice;
